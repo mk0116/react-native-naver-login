@@ -56,28 +56,31 @@
     RCTLogInfo(@"oauth20ConnectionDidFinishDeleteToken");
 }
 
+-(void)setupConn {
+    naverConn = [NaverThirdPartyLoginConnection getSharedInstance];
+    naverConn.delegate = self;
+    
+    [naverConn setConsumerKey:[keyObj objectForKey:@"kConsumerKey"]];
+    [naverConn setConsumerSecret:[keyObj objectForKey:@"kConsumerSecret"]];
+    [naverConn setAppName:[keyObj objectForKey:@"kServiceAppName"]];
+    [naverConn setServiceUrlScheme:[keyObj objectForKey:@"kServiceAppUrlScheme"]];
+    
+    [naverConn setIsNaverAppOauthEnable:YES];
+    [naverConn setIsInAppOauthEnable:YES];
+    [naverConn setOnlyPortraitSupportInIphone:YES];
+}
+
 RCT_EXPORT_MODULE();
 
 RCT_EXPORT_METHOD(login:(NSString *)keyJson callback:(RCTResponseSenderBlock)callback) {
     RCTLogInfo(@"login");
     naverTokenSend = callback;
         
-    naverConn = [NaverThirdPartyLoginConnection getSharedInstance];
-    naverConn.delegate = self;
-        
     NSData *jsonData = [keyJson dataUsingEncoding:NSUTF8StringEncoding];
     NSError *e;
     NSDictionary *keyObj = [NSJSONSerialization JSONObjectWithData:jsonData options:nil error:&e];
         
-    [naverConn setConsumerKey:[keyObj objectForKey:@"kConsumerKey"]];
-    [naverConn setConsumerSecret:[keyObj objectForKey:@"kConsumerSecret"]];
-    [naverConn setAppName:[keyObj objectForKey:@"kServiceAppName"]];
-    [naverConn setServiceUrlScheme:[keyObj objectForKey:@"kServiceAppUrlScheme"]];
-        
-    [naverConn setIsNaverAppOauthEnable:YES]; // 네이버 앱 사용 안할 때는 NO
-    [naverConn setIsInAppOauthEnable:YES]; // 내장 웹뷰 사용 안할 때는 NO
-        
-    [naverConn setOnlyPortraitSupportInIphone:YES]; // 포트레이트 레이아웃만 사용하는 경우.
+    [self setupConn];
         
     NSString *token = [naverConn accessToken];
         
@@ -98,6 +101,7 @@ RCT_EXPORT_METHOD(logout) {
 
 RCT_EXPORT_METHOD(loginSilently:(NSString *)token callback:(RCTResponseSenderBlock)callback) {
     naverTokenSend = callback;
+    [self setupConn];
     if ([naverConn isValidAccessTokenExpireTimeNow]) {
         RCTLogInfo(@"loginSilently] vaild token");
         naverTokenSend(@[[NSNull null], token]);
