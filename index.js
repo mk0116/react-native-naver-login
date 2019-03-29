@@ -8,6 +8,9 @@ const NaverLoginIos = {
   login(param, callback) {
     IosNaverLogin.login(JSON.stringify(param), callback);
   },
+  loginSilently(token, callback) {
+    IosNaverLogin.loginSilently(token, callback);
+  },
   logout() {
     IosNaverLogin.logout();
   }
@@ -15,6 +18,10 @@ const NaverLoginIos = {
 
 const RNNaverLoginAndr = {
   login(param, callback) {
+    RNNaverLogin.login(JSON.stringify(param), callback);
+  },
+  loginSilently(param, callback) {
+    //android refresh token automatically
     RNNaverLogin.login(JSON.stringify(param), callback);
   },
   logout() {

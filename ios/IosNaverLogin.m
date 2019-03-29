@@ -35,8 +35,8 @@
     }
 }
 -(void)oauth20ConnectionDidFinishRequestACTokenWithRefreshToken {
+    RCTLogInfo(@"oauth20ConnectionDidFinishRequestACTokenWithRefreshToken");
     NSString *token = [naverConn accessToken];
-    NSLog(@" \n\n\n Nearo oauth20ConnectionDidFinishRequestACTokenWithRefreshToken \n\n\n  %@ \n\n .", token);
     if (naverTokenSend != nil) {
         naverTokenSend(@[[NSNull null], token]);
     }
@@ -100,10 +100,22 @@
     }
     
     RCT_EXPORT_METHOD(logout) {
-        RCTLogInfo(@"\n\n\n\n Obj c >> Nearo ReactIosAuth :: logout \n\n\n\n .");
+        RCTLogInfo(@"logout");
         [naverConn resetToken];
         naverTokenSend = nil;
     }
+
+RCT_EXPORT_METHOD(loginSilently:(NSString *)token callback:(RCTResponseSenderBlock)callback) {
+    naverTokenSend = callback;
+    if ([naverConn isValidAccessTokenExpireTimeNow]) {
+        RCTLogInfo(@"loginSilently] vaild token");
+        naverTokenSend(@[[NSNull null], token]);
+    }
+    else {
+        RCTLogInfo(@"loginSilently] expired token");
+        [naverConn requestAccessTokenWithRefreshToken];
+    }
+}
     
     //RCT_EXPORT_METHOD(getProfile:(NSString *)token resp(RCTResponseSenderBlock)response) {
     //  if (NO == [naverConn isValidAccessTokenExpireTimeNow]) {
