@@ -8,8 +8,8 @@ const NaverLoginIos = {
   login(param, callback) {
     IosNaverLogin.login(JSON.stringify(param), callback);
   },
-  loginSilently(token, callback) {
-    IosNaverLogin.loginSilently(token, callback);
+  loginSilently(param, callback) {
+    IosNaverLogin.loginSilently(JSON.stringify(param), callback);
   },
   logout() {
     IosNaverLogin.logout();
