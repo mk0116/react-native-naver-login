@@ -56,7 +56,12 @@
     RCTLogInfo(@"oauth20ConnectionDidFinishDeleteToken");
 }
 
--(void)setupConn:(NSString *)keyJson {
+RCT_EXPORT_MODULE();
+
+RCT_EXPORT_METHOD(login:(NSString *)keyJson callback:(RCTResponseSenderBlock)callback) {
+    RCTLogInfo(@"login");
+    naverTokenSend = callback;
+    
     naverConn = [NaverThirdPartyLoginConnection getSharedInstance];
     naverConn.delegate = self;
     
@@ -72,19 +77,10 @@
     [naverConn setIsNaverAppOauthEnable:YES];
     [naverConn setIsInAppOauthEnable:YES];
     [naverConn setOnlyPortraitSupportInIphone:YES];
-}
 
-RCT_EXPORT_MODULE();
-
-RCT_EXPORT_METHOD(login:(NSString *)keyJson callback:(RCTResponseSenderBlock)callback) {
-    RCTLogInfo(@"login");
-    naverTokenSend = callback;
-    [self setupConn:keyJson];
-        
-    NSString *token = [naverConn accessToken];
     if ([naverConn isValidAccessTokenExpireTimeNow]) {
         RCTLogInfo(@"valid token");
-        naverTokenSend(@[[NSNull null], token]);
+        naverTokenSend(@[[NSNull null], [naverConn accessToken]]);
     } else {
         RCTLogInfo(@"invalid token");
         [naverConn requestThirdPartyLogin];
@@ -97,12 +93,28 @@ RCT_EXPORT_METHOD(logout) {
     naverTokenSend = nil;
 }
 
-RCT_EXPORT_METHOD(loginSilently:(NSString *)keyJson token:(NSString *)token callback:(RCTResponseSenderBlock)callback) {
+RCT_EXPORT_METHOD(loginSilently:(NSString *)keyJson callback:(RCTResponseSenderBlock)callback) {
     naverTokenSend = callback;
-    [self setupConn:keyJson];
+    
+    naverConn = [NaverThirdPartyLoginConnection getSharedInstance];
+    naverConn.delegate = self;
+    
+    NSData *jsonData = [keyJson dataUsingEncoding:NSUTF8StringEncoding];
+    NSError *e;
+    NSDictionary *keyObj = [NSJSONSerialization JSONObjectWithData:jsonData options:nil error:&e];
+    
+    [naverConn setConsumerKey:[keyObj objectForKey:@"kConsumerKey"]];
+    [naverConn setConsumerSecret:[keyObj objectForKey:@"kConsumerSecret"]];
+    [naverConn setAppName:[keyObj objectForKey:@"kServiceAppName"]];
+    [naverConn setServiceUrlScheme:[keyObj objectForKey:@"kServiceAppUrlScheme"]];
+    
+    [naverConn setIsNaverAppOauthEnable:YES];
+    [naverConn setIsInAppOauthEnable:YES];
+    [naverConn setOnlyPortraitSupportInIphone:YES];
+    
     if ([naverConn isValidAccessTokenExpireTimeNow]) {
         RCTLogInfo(@"loginSilently] vaild token");
-        naverTokenSend(@[[NSNull null], token]);
+        naverTokenSend(@[[NSNull null], [naverConn accessToken]]);
     }
     else {
         RCTLogInfo(@"loginSilently] expired token");
