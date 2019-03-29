@@ -17,7 +17,7 @@
 @implementation IosNaverLogin
 
 -(void)oauth20Connection:(NaverThirdPartyLoginConnection *)oauthConnection didFailWithError:(NSError *)error {
-    RCTLogInfo(@"oauth20Connection error = %@", error);
+    RCTLogInfo(@"oauth20Connection error");
     naverTokenSend = nil;
 }
     
@@ -78,9 +78,10 @@ RCT_EXPORT_METHOD(login:(NSString *)keyJson callback:(RCTResponseSenderBlock)cal
     [naverConn setIsInAppOauthEnable:YES];
     [naverConn setOnlyPortraitSupportInIphone:YES];
 
+    NSString *token = [naverConn accessToken];
     if ([naverConn isValidAccessTokenExpireTimeNow]) {
         RCTLogInfo(@"valid token");
-        naverTokenSend(@[[NSNull null], [naverConn accessToken]]);
+        naverTokenSend(@[[NSNull null], token]);
     } else {
         RCTLogInfo(@"invalid token");
         [naverConn requestThirdPartyLogin];
@@ -112,9 +113,10 @@ RCT_EXPORT_METHOD(loginSilently:(NSString *)keyJson callback:(RCTResponseSenderB
     [naverConn setIsInAppOauthEnable:YES];
     [naverConn setOnlyPortraitSupportInIphone:YES];
     
+    NSString *token = [naverConn accessToken];
     if ([naverConn isValidAccessTokenExpireTimeNow]) {
         RCTLogInfo(@"loginSilently] vaild token");
-        naverTokenSend(@[[NSNull null], [naverConn accessToken]]);
+        naverTokenSend(@[[NSNull null], token]);
     }
     else {
         RCTLogInfo(@"loginSilently] expired token");
