@@ -56,9 +56,13 @@
     RCTLogInfo(@"oauth20ConnectionDidFinishDeleteToken");
 }
 
--(void)setupConn {
+-(void)setupConn:(NSString *)keyJson {
     naverConn = [NaverThirdPartyLoginConnection getSharedInstance];
     naverConn.delegate = self;
+    
+    NSData *jsonData = [keyJson dataUsingEncoding:NSUTF8StringEncoding];
+    NSError *e;
+    NSDictionary *keyObj = [NSJSONSerialization JSONObjectWithData:jsonData options:nil error:&e];
     
     [naverConn setConsumerKey:[keyObj objectForKey:@"kConsumerKey"]];
     [naverConn setConsumerSecret:[keyObj objectForKey:@"kConsumerSecret"]];
@@ -75,15 +79,9 @@ RCT_EXPORT_MODULE();
 RCT_EXPORT_METHOD(login:(NSString *)keyJson callback:(RCTResponseSenderBlock)callback) {
     RCTLogInfo(@"login");
     naverTokenSend = callback;
-        
-    NSData *jsonData = [keyJson dataUsingEncoding:NSUTF8StringEncoding];
-    NSError *e;
-    NSDictionary *keyObj = [NSJSONSerialization JSONObjectWithData:jsonData options:nil error:&e];
-        
-    [self setupConn];
+    [self setupConn:keyJson];
         
     NSString *token = [naverConn accessToken];
-        
     if ([naverConn isValidAccessTokenExpireTimeNow]) {
         RCTLogInfo(@"valid token");
         naverTokenSend(@[[NSNull null], token]);
@@ -99,9 +97,9 @@ RCT_EXPORT_METHOD(logout) {
     naverTokenSend = nil;
 }
 
-RCT_EXPORT_METHOD(loginSilently:(NSString *)token callback:(RCTResponseSenderBlock)callback) {
+RCT_EXPORT_METHOD(loginSilently:(NSString *)keyJson token:(NSString *)token callback:(RCTResponseSenderBlock)callback) {
     naverTokenSend = callback;
-    [self setupConn];
+    [self setupConn:keyJson];
     if ([naverConn isValidAccessTokenExpireTimeNow]) {
         RCTLogInfo(@"loginSilently] vaild token");
         naverTokenSend(@[[NSNull null], token]);
