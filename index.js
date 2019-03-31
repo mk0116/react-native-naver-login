@@ -21,8 +21,7 @@ const RNNaverLoginAndr = {
     RNNaverLogin.login(JSON.stringify(param), callback);
   },
   loginSilently(param, callback) {
-    //android refresh token automatically
-    RNNaverLogin.login(JSON.stringify(param), callback);
+    RNNaverLogin.loginSilently(JSON.stringify(param), callback);
   },
   logout() {
     RNNaverLogin.logout();

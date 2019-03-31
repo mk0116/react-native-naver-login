@@ -1,8 +1,8 @@
-
 package com.dooboolab.naverlogin;
 
 import android.app.Activity;
 import android.util.Log;
+import android.os.AsyncTask;
 
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
@@ -116,4 +116,44 @@ public class RNNaverLoginModule extends ReactContextBaseJavaModule {
       Log.d(TAG, "JSONException: " + je);
     }
   }
+  @ReactMethod
+    public void loginSilently(String initials, final Callback cb) {
+      final Activity activity = getCurrentActivity();
+        try {
+          JSONObject jsonObject = new JSONObject(initials);
+          mOAuthLoginModule = OAuthLogin.getInstance();
+          mOAuthLoginModule.init(
+            reactContext,
+            jsonObject.getString("kConsumerKey"),
+            jsonObject.getString("kConsumerSecret"),
+            jsonObject.getString("kServiceAppName")
+          );
+          RefreshTokenTask task = new RefreshTokenTask();
+          task.cb = cb;
+          task.execute();
+         } catch (JSONException je) {
+           Log.d(TAG, "JSONException: " + je);
+         }
+       }
+
+    class RefreshTokenTask extends AsyncTask<Void, Void, String> {
+      Callback cb;
+
+      @Override
+      protected String doInBackground(Void... params) {
+        return OAuthLogin.getInstance().refreshAccessToken(reactContext);
+      }
+
+      protected void onPostExecute(String res) {
+       if (cb != null) {
+         if (res != null) {
+          cb.invoke(null, res);
+         }
+         else {
+          cb.invoke("token refresh fail", null);
+         }
+       }
+       cb = null;
+      }
+   }
 }
