@@ -17,8 +17,11 @@
 @implementation IosNaverLogin
 
 -(void)oauth20Connection:(NaverThirdPartyLoginConnection *)oauthConnection didFailWithError:(NSError *)error {
-    RCTLogInfo(@"oauth20Connection error");
-    naverTokenSend = nil;
+    RCTLogInfo(@"oauth20Connection error = %@", [NSString stringWithFormat:@"%@", error]);
+    if (naverTokenSend != nil) {
+        naverTokenSend(@[error, [NSNull null]]);
+        naverTokenSend = nil;
+    }
 }
     
 -(void)oauth20ConnectionDidFinishRequestACTokenWithAuthCode {
@@ -34,6 +37,7 @@
     NSString *token = [naverConn accessToken];
     if (naverTokenSend != nil) {
         naverTokenSend(@[[NSNull null], token]);
+        naverTokenSend = nil;
     }
 }
     
@@ -69,11 +73,6 @@ RCT_EXPORT_METHOD(login:(NSString *)keyJson callback:(RCTResponseSenderBlock)cal
     NSError *e;
     NSDictionary *keyObj = [NSJSONSerialization JSONObjectWithData:jsonData options:nil error:&e];
     
-    [naverConn setConsumerKey:[keyObj objectForKey:@"kConsumerKey"]];
-    [naverConn setConsumerSecret:[keyObj objectForKey:@"kConsumerSecret"]];
-    [naverConn setAppName:[keyObj objectForKey:@"kServiceAppName"]];
-    [naverConn setServiceUrlScheme:[keyObj objectForKey:@"kServiceAppUrlScheme"]];
-    
     [naverConn setIsNaverAppOauthEnable:YES];
     [naverConn setIsInAppOauthEnable:YES];
     [naverConn setOnlyPortraitSupportInIphone:YES];
@@ -104,11 +103,6 @@ RCT_EXPORT_METHOD(loginSilently:(NSString *)keyJson callback:(RCTResponseSenderB
     NSError *e;
     NSDictionary *keyObj = [NSJSONSerialization JSONObjectWithData:jsonData options:nil error:&e];
     
-    [naverConn setConsumerKey:[keyObj objectForKey:@"kConsumerKey"]];
-    [naverConn setConsumerSecret:[keyObj objectForKey:@"kConsumerSecret"]];
-    [naverConn setAppName:[keyObj objectForKey:@"kServiceAppName"]];
-    [naverConn setServiceUrlScheme:[keyObj objectForKey:@"kServiceAppUrlScheme"]];
-    
     [naverConn setIsNaverAppOauthEnable:YES];
     [naverConn setIsInAppOauthEnable:YES];
     [naverConn setOnlyPortraitSupportInIphone:YES];
@@ -120,7 +114,9 @@ RCT_EXPORT_METHOD(loginSilently:(NSString *)keyJson callback:(RCTResponseSenderB
     }
     else {
         RCTLogInfo(@"loginSilently] expired token");
-        [naverConn requestAccessTokenWithRefreshToken];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [naverConn requestAccessTokenWithRefreshToken];
+        });
     }
 }
     
