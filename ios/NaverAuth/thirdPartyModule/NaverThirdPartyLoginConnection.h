@@ -11,7 +11,7 @@
 #import "NaverThirdPartyConstantsForApp.h"
 
 @protocol NaverThirdPartyLoginConnectionDelegate;
-@interface NaverThirdPartyLoginConnection : NSObject <UIAlertViewDelegate>
+@interface NaverThirdPartyLoginConnection : NSObject <UIAlertViewDelegate, UIApplicationDelegate>
 {
     
     BOOL _isNaverAppOauthEnable;
