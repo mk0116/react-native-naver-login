@@ -83,7 +83,9 @@ RCT_EXPORT_METHOD(login:(NSString *)keyJson callback:(RCTResponseSenderBlock)cal
         naverTokenSend(@[[NSNull null], token]);
     } else {
         RCTLogInfo(@"invalid token");
-        [naverConn requestThirdPartyLogin];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [naverConn requestThirdPartyLogin];
+        });
     }
 }
     
