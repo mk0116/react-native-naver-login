@@ -136,6 +136,23 @@ public class RNNaverLoginModule extends ReactContextBaseJavaModule {
          }
        }
 
+       @ReactMethod
+       public void getToken(String initials, final Callback cb) {
+           try {
+                     JSONObject jsonObject = new JSONObject(initials);
+                     mOAuthLoginModule = OAuthLogin.getInstance();
+                     mOAuthLoginModule.init(
+                       reactContext,
+                       jsonObject.getString("kConsumerKey"),
+                       jsonObject.getString("kConsumerSecret"),
+                       jsonObject.getString("kServiceAppName")
+                     );
+                     cb.invoke(null, mOAuthLoginModule.getAccessToken(reactContext));
+                    } catch (JSONException je) {
+                      Log.d(TAG, "JSONException: " + je);
+                    }
+       }
+
     class RefreshTokenTask extends AsyncTask<Void, Void, String> {
       Callback cb;
 

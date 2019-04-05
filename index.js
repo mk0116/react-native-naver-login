@@ -6,10 +6,13 @@ const { IosNaverLogin, RNNaverLogin } = NativeModules; // 여기 이름은 달�
 
 const NaverLoginIos = {
   login(param, callback) {
-    IosNaverLogin.login(JSON.stringify(param), callback);
+    IosNaverLogin.login(callback);
   },
   loginSilently(param, callback) {
-    IosNaverLogin.loginSilently(JSON.stringify(param), callback);
+    IosNaverLogin.loginSilently(callback);
+  },
+  getToken(param, callback) {
+    IosNaverLogin.getToken(callback);
   },
   logout() {
     IosNaverLogin.logout();
@@ -22,6 +25,9 @@ const RNNaverLoginAndr = {
   },
   loginSilently(param, callback) {
     RNNaverLogin.loginSilently(JSON.stringify(param), callback);
+  },
+  getToken(param, callback) {
+    RNNaverLogin.getToken(JSON.stringify(param), callback);
   },
   logout() {
     RNNaverLogin.logout();
@@ -43,7 +49,7 @@ const getProfile = (token) => {
 };
 
 const NaverLogin = Platform.OS === 'ios'
-  ? NaverLoginIos
-  : RNNaverLoginAndr;
+    ? NaverLoginIos
+    : RNNaverLoginAndr;
 
 module.exports = { NaverLogin, getProfile }
