@@ -21,6 +21,7 @@ public class RNNaverLoginModule extends ReactContextBaseJavaModule {
 
   private final ReactApplicationContext reactContext;
   private OAuthLogin mOAuthLoginModule;
+  private Callback mCallback;
 
   public RNNaverLoginModule(ReactApplicationContext reactContext) {
     super(reactContext);
@@ -65,6 +66,10 @@ public class RNNaverLoginModule extends ReactContextBaseJavaModule {
 
   @ReactMethod
   public void login(String initials, final Callback cb) {
+    if (mCallback != null) {
+      return;
+    }
+    mCallback = cb;
     final Activity activity = getCurrentActivity();
     try {
       JSONObject jsonObject = new JSONObject(initials);
@@ -96,16 +101,25 @@ public class RNNaverLoginModule extends ReactContextBaseJavaModule {
                       response.put("expiresAt", expiresAt);
                       response.put("tokenType", tokenType);
                       // cb.invoke(null, response.toString());
-                      cb.invoke(null, accessToken);
+                      if (mCallback != null) {
+                        mCallback.invoke(null, accessToken);
+                        mCallback = null;
+                      }
                     } catch (JSONException je) {
                       Log.e(TAG, "JSONEXception: " + je.getMessage());
-                      cb.invoke(je.getMessage(), null);
+                      if (mCallback != null) {
+                        mCallback.invoke(je.getMessage(), null);
+                        mCallback = null;
+                      }
                     }
 
                   } else {
                     String errCode = mOAuthLoginModule.getLastErrorCode(reactContext).getCode();
                     String errDesc = mOAuthLoginModule.getLastErrorDesc(reactContext);
-                    cb.invoke("login failed", null);
+                    if (mCallback != null) {
+                      mCallback.invoke("login failed", null);
+                      mCallback = null;
+                    }
                     Log.e(TAG, "errCode: " + errCode + ", errDesc: " + errDesc);
                   }
                 }
